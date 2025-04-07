@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" />
+  
+  <title>AI Calculator</title>
+  <style>
+    :root {
+      --bg-light: #ffffff;
+      --bg-dark: #121212;
+      --text-light: #000000;
+      --text-dark: #ffffff;
+      --primary: #00796b;
+    }
+
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    .calculator {
+      background: inherit;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .display {
+      width: 100%;
+      font-size: 1.5em;
+      padding: 10px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      padding: 15px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--primary);
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #004d40;
+    }
+
+    .toggle-mode {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #444;
+      color: #fff;
+      border-radius: 6px;
+      font-size: 0.9em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+    
+      
+
+
+  <div class="calculator">
+    <input type="text" class="display" id="display" placeholder="Enter expression" />
+    <div class="buttons">
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+      <button onclick="append('3')">3</button>
+      <button onclick="append('+')">+</button>
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('-')">-</button>
+      <button onclick="append('7')">7</button>
+      <button onclick="append('8')">8</button>
+      <button onclick="append('9')">9</button>
+      <button onclick="append('*')">*</button>
+      <button onclick="append('0')">0</button>
+      <button onclick="append('.')">.</button>
+      <button onclick="calculate()">=</button>
+      <button onclick="append('/')">/</button>
+      <button onclick="clearDisplay()">C</button>
+      <button onclick="backspace()">←</button>
+      <button onclick="append('%')">%</button>
+    </div>
+    <br />
+    <input type="text" class="display" id="aiInput" placeholder="e.g. Add 7 and 9" />
+    <button onclick="aiCalculate()">AI Calculate</button>
+    <div class="toggle-mode" onclick="toggleMode()">Toggle Dark/Light</div>
+    <button id="installButton" style="display: none; position: fixed; bottom: 20px; right: 20px; padding: 10px 15px; font-size: 1em; background: #00796b; color: white; border: none; border-radius: 8px; cursor: pointer; z-index: 1000;">
+        Install App
+      </button>
+  </div>
+
+
+  <div class="spy-calculator">A.I Calculator</div>
+  <style>
+    /* ...existing styles... */
+  
+    .spy-calculator {
+      position: fixed;
+      top: 50%;
+      right: 80px;
+      transform: translateY(-50%);
+      color: grey;
+      font-size: 50px;
+      font-weight: bold;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      opacity: 0.5;
+    }
+  
+    /* Responsive styles for mobile devices */
+    @media (max-width: 768px) {
+      .spy-calculator {
+        top: 25px;
+        right: 50%;
+        transform: translateX(50%);
+        writing-mode: horizontal-tb;
+        text-orientation: initial;
+        font-size: 30px;
+      }
+    }
+  </style>
+
+
+
+  <script>
+
+
+
+
+    const display = document.getElementById('display');
+    const aiInput = document.getElementById('aiInput');
+
+    function append(char) {
+      const start = display.selectionStart;
+      const end = display.selectionEnd;
+      const currentValue = display.value;
+      display.value = currentValue.substring(0, start) + char + currentValue.substring(end);
+      display.focus();
+      display.selectionStart = display.selectionEnd = start + char.length;
+    }
+
+    function clearDisplay() {
+      display.value = '';
+    }
+
+    function backspace() {
+      const start = display.selectionStart;
+      const end = display.selectionEnd;
+      if (start === end && start > 0) {
+        display.value = display.value.slice(0, start - 1) + display.value.slice(end);
+        display.selectionStart = display.selectionEnd = start - 1;
+      } else if (start !== end) {
+        display.value = display.value.slice(0, start) + display.value.slice(end);
+        display.selectionStart = display.selectionEnd = start;
+      }
+      display.focus();
+    }
+
+    function calculate() {
+      try {
+        display.value = eval(display.value);
+      } catch {
+        alert('Invalid expression');
+      }
+    }
+
+    function aiCalculate() {
+      const input = aiInput.value.toLowerCase();
+      let match;
+      if ((match = input.match(/add (\d+) and (\d+)/))) {
+        display.value = parseInt(match[1]) + parseInt(match[2]);
+      } else if ((match = input.match(/subtract (\d+) from (\d+)/))) {
+        display.value = parseInt(match[2]) - parseInt(match[1]);
+      } else if ((match = input.match(/multiply (\d+) and (\d+)/))) {
+        display.value = parseInt(match[1]) * parseInt(match[2]);
+      } else if ((match = input.match(/divide (\d+) by (\d+)/))) {
+        display.value = parseInt(match[1]) / parseInt(match[2]);
+      } else {
+        alert("Sorry, I couldn't understand that.");
+      }
+    }
+
+    function toggleMode() {
+      document.body.classList.toggle('dark');
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').then(reg => {
+          console.log('Service worker registered:', reg);
+        });
+      });
+    }
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+
+
+
+
+
+    let deferredPrompt;
+const installButton = document.getElementById('installButton');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installButton.style.display = 'block';
+});
+
+installButton.addEventListener('click', () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      deferredPrompt = null;
+      installButton.style.display = 'none';
+    });
+  }
+});
+    
+    
+        window.addEventListener('appinstalled', () => {
+        console.log('App installed successfully!');
+        installButton.style.display = 'none';
+        });
+
+
+
+
+  // ...existing code...
+
+  // Add event listener for keyboard input
+  display.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      calculate();
+    }
+  });
+
+  aiInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      aiCalculate();
+    }
+  });
+
+  // ...existing code...
+
+
+
+
+
+
+
+  
+  // ...existing code...
+
+  function append(char) {
+    const start = display.selectionStart;
+    const end = display.selectionEnd;
+    const currentValue = display.value;
+    display.value = currentValue.substring(0, start) + char + currentValue.substring(end);
+    display.focus();
+    display.selectionStart = display.selectionEnd = start + char.length;
+  }
+
+  function calculate() {
+    try {
+      // Replace '%' with modulus operator for evaluation
+      const expression = display.value.replace(/%/g, '/100');
+      display.value = eval(expression);
+    } catch {
+      alert('Invalid expression');
+    }
+  }
+
+  // ...existing code...
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </script>
+</body>
+</html>
